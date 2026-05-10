@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header fade-up">
+    <h2>Profile Settings</h2>
+</div>
+
+<div style="max-width:480px;margin:0 auto;" class="fade-up">
+    <div class="card">
+        <div class="card-body text-center" style="padding-top:1.5rem;">
+            {% if current_user.profile_image %}
+                <img src="{{ url_for('static', filename='uploads/' + current_user.profile_image) }}"
+                     class="avatar" alt="Profile photo"
+                     style="border:3px solid var(--bg-surface);box-shadow:0 4px 16px rgba(0,0,0,0.5);">
+            {% else %}
+                <div class="avatar-placeholder"
+                     style="border:3px solid var(--bg-surface);box-shadow:0 4px 16px rgba(0,0,0,0.5);">
+                    {{ current_user.name[0].upper() }}
+                </div>
+            {% endif %}
+
+            <h3 style="margin-bottom:4px;">{{ current_user.name }}</h3>
+            <p class="muted" style="font-size:0.85rem;margin-bottom:1.75rem;">{{ current_user.email }}</p>
+
+            <form method="POST" enctype="multipart/form-data" style="text-align:left;">
+                {{ form.hidden_tag() }}
+
+                <div class="form-group">
+                    <label class="form-label">Display Name</label>
+                    {{ form.name(class="form-control", value=current_user.name) }}
+                </div>
+
+                <div class="form-group mb-4">
+                    <label class="form-label">Profile Photo</label>
+                    <label class="file-input-label">
+                        <span class="file-input-btn">Choose Photo</span>
+                        <span class="file-input-text" id="file-label-text">No file chosen</span>
+                        {{ form.profile_image(class="file-input-hidden", id="profile-photo-input") }}
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex align-center justify-between flex-wrap gap-2 mb-4 fade-up">
+    <div>
+        <h2>Create New Trip</h2>
+        <p style="margin-top:4px;">Fill in the details to start planning.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-7 mb-col fade-up" style="max-width:560px;margin:0 auto;flex:0 0 100%;">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+
+                    <div class="form-group">
+                        <label class="form-label">Trip Title</label>
+                        {{ form.title(class="form-control", placeholder="e.g. Summer Europe Adventure") }}
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Description</label>
+                        {{ form.description(class="form-control", placeholder="What's this trip about?") }}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6 mb-col">
+                            <div class="form-group mb-0">
+                                <label class="form-label">Start Date</label>
+                                {{ form.start_date(class="form-control") }}
+                            </div>
+                        </div>
+                        <div class="col-6 mb-col">
+                            <div class="form-group mb-0">
+                                <label class="form-label">End Date</label>
+                                {{ form.end_date(class="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mt-3">
+                        <label class="form-label">Budget (₹)</label>
+                        {{ form.budget(class="form-control", placeholder="e.g. 50000") }}
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">Create Trip</button>
+                        <a href="/trips" class="btn btn-ghost">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

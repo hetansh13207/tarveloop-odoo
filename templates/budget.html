@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header fade-up">
+    <div>
+        <h2>Budget Overview</h2>
+        <p style="margin-top:4px;">{{ trip.title }}</p>
+    </div>
+    <a href="/trip/{{ trip.id }}" class="btn btn-ghost btn-sm">← Itinerary</a>
+</div>
+
+<div class="row mb-4 fade-up">
+    <div class="col-4 mb-col">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:var(--accent-sub);color:var(--accent);">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/></svg>
+            </div>
+            <div class="stat-label">Total Budget</div>
+            <div class="stat-value">₹{{ trip.budget }}</div>
+            <p style="font-size:0.78rem;margin-top:4px;">Planned spend</p>
+        </div>
+    </div>
+    <div class="col-4 mb-col">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:var(--danger-sub);color:var(--danger);">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </div>
+            <div class="stat-label">Activity Expenses</div>
+            <div class="stat-value" style="color:var(--danger);">₹{{ total_activity_cost }}</div>
+            <p style="font-size:0.78rem;margin-top:4px;">{{ total_activities }} activities logged</p>
+        </div>
+    </div>
+    <div class="col-4 mb-col">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:var(--success-sub);color:var(--success);">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+            </div>
+            <div class="stat-label">Remaining</div>
+            <div class="stat-value" style="color:{% if remaining_budget < 0 %}var(--danger){% else %}var(--success){% endif %};">₹{{ remaining_budget }}</div>
+            <p style="font-size:0.78rem;margin-top:4px;">{% if remaining_budget < 0 %}Over budget{% else %}Still available{% endif %}</p>
+        </div>
+    </div>
+</div>
+
+<div class="card fade-up mb-4">
+    <div class="card-body">
+        <div class="d-flex align-center justify-between mb-2">
+            <span style="font-size:0.85rem;font-weight:600;color:var(--text-2);">Budget Used</span>
+            <span style="font-size:0.85rem;font-weight:700;color:var(--text-1);">
+                {% if trip.budget > 0 %}
+                    {{ ((total_activity_cost / trip.budget) * 100) | round(1) }}%
+                {% else %}0%{% endif %}
+            </span>
+        </div>
+        <div class="budget-bar-wrap">
+            <div class="budget-bar {% if remaining_budget < 0 %}over{% endif %}"
+                 style="width:{% if trip.budget > 0 %}{{ [((total_activity_cost / trip.budget) * 100), 100] | min }}%{% else %}0%{% endif %}">
+            </div>
+        </div>
+        {% if remaining_budget < 0 %}
+        <p style="color:var(--danger);font-size:0.8rem;margin-top:8px;">⚠️ You've exceeded your budget by ₹{{ (remaining_budget * -1) }}.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- CURRENCY CONVERTER -->
+<div class="card fade-up mb-4">
+    <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <div>
+            <h4 style="margin:0;">Currency Converter</h4>
+            <p style="font-size:0.78rem;color:var(--text-3);margin-top:2px;" id="rate-status">Fetching live rates…</p>
+        </div>
+        <select id="currency-select" class="form-control" style="width:auto;min-width:140px;">
+            <option value="USD">🇺🇸 USD — Dollar</option>
+            <option value="EUR">🇪🇺 EUR — Euro</option>
+            <option value="GBP">🇬🇧 GBP — Pound</option>
+            <option value="JPY">🇯🇵 JPY — Yen</option>
+            <option value="AED">🇦🇪 AED — Dirham</option>
+            <option value="SGD">🇸🇬 SGD — S$ Dollar</option>
+            <option value="THB">🇹🇭 THB — Baht</option>
+            <option value="AUD">🇦🇺 AUD — A$ Dollar</option>
+            <option value="CAD">🇨🇦 CAD — C$ Dollar</option>
+            <option value="CHF">🇨🇭 CHF — Franc</option>
+            <option value="CNY">🇨🇳 CNY — Yuan</option>
+            <option value="KRW">🇰🇷 KRW — Won</option>
+        </select>
+    </div>
+    <div class="card-body">
+        <div class="row" id="converter-rows">
+            <div class="col-4 mb-col">
+                <div class="curr-box">
+                    <div class="curr-label">Total Budget</div>
+                    <div class="curr-inr">₹{{ trip.budget }}</div>
+                    <div class="curr-converted" id="conv-budget">—</div>
+                </div>
+            </div>
+            <div class="col-4 mb-col">
+                <div class="curr-box">
+                    <div class="curr-label">Expenses So Far</div>
+                    <div class="curr-inr">₹{{ total_activity_cost }}</div>
+                    <div class="curr-converted" id="conv-spent">—</div>
+                </div>
+            </div>
+            <div class="col-4 mb-col">
+                <div class="curr-box">
+                    <div class="curr-label">Remaining</div>
+                    <div class="curr-inr">₹{{ remaining_budget }}</div>
+                    <div class="curr-converted" id="conv-remaining">—</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card fade-up">
+    <div class="card-header">
+        <h4 style="margin:0;">Trip Statistics</h4>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-6 mb-col" style="flex:0 0 50%;max-width:50%;">
+                <div style="font-size:0.8rem;color:var(--text-3);margin-bottom:4px;">Total Activities</div>
+                <div style="font-size:1.1rem;font-weight:700;color:var(--text-1);">{{ total_activities }}</div>
+            </div>
+            <div class="col-6 mb-col" style="flex:0 0 50%;max-width:50%;">
+                <div style="font-size:0.8rem;color:var(--text-3);margin-bottom:4px;">Planned Budget</div>
+                <div style="font-size:1.1rem;font-weight:700;color:var(--text-1);">₹{{ trip.budget }}</div>
+            </div>
+            <div class="col-6" style="flex:0 0 50%;max-width:50%;">
+                <div style="font-size:0.8rem;color:var(--text-3);margin-bottom:4px;">Used Budget</div>
+                <div style="font-size:1.1rem;font-weight:700;color:var(--danger);">₹{{ total_activity_cost }}</div>
+            </div>
+            <div class="col-6" style="flex:0 0 50%;max-width:50%;">
+                <div style="font-size:0.8rem;color:var(--text-3);margin-bottom:4px;">Budget Left</div>
+                <div style="font-size:1.1rem;font-weight:700;color:var(--success);">₹{{ remaining_budget }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    const INR_BUDGET  = {{ trip.budget }};
+    const INR_SPENT   = {{ total_activity_cost }};
+    const INR_REM     = {{ remaining_budget }};
+
+    const elBudget    = document.getElementById('conv-budget');
+    const elSpent     = document.getElementById('conv-spent');
+    const elRemaining = document.getElementById('conv-remaining');
+    const elSelect    = document.getElementById('currency-select');
+    const elStatus    = document.getElementById('rate-status');
+
+    let rates = null;
+
+    const SYMBOLS = {
+        USD:'$', EUR:'€', GBP:'£', JPY:'¥', AED:'د.إ', SGD:'S$',
+        THB:'฿', AUD:'A$', CAD:'C$', CHF:'Fr', CNY:'¥', KRW:'₩'
+    };
+
+    function fmt(inr, rate, code) {
+        if (!rate) return '—';
+        const val = inr * rate;
+        const sym = SYMBOLS[code] || code + ' ';
+        const decimals = ['JPY','KRW','THB'].includes(code) ? 0 : 2;
+        return sym + val.toLocaleString('en-IN', { maximumFractionDigits: decimals });
+    }
+
+    function update() {
+        const code = elSelect.value;
+        const rate = rates ? rates[code] : null;
+        elBudget.textContent    = rate ? fmt(INR_BUDGET, rate, code) : '—';
+        elSpent.textContent     = rate ? fmt(INR_SPENT,  rate, code) : '—';
+        elRemaining.textContent = rate ? fmt(INR_REM,    rate, code) : '—';
+    }
+
+    elSelect.addEventListener('change', update);
+
+    fetch('https://open.er-api.com/v6/latest/INR')
+        .then(r => r.json())
+        .then(data => {
+            if (data && data.rates) {
+                rates = data.rates;
+                const ts = new Date(data.time_last_update_utc).toLocaleString('en-IN',{dateStyle:'medium',timeStyle:'short'});
+                elStatus.textContent = 'Live rates · updated ' + ts;
+                update();
+            } else {
+                elStatus.textContent = 'Could not fetch live rates';
+            }
+        })
+        .catch(() => {
+            elStatus.textContent = 'Offline — live rates unavailable';
+        });
+})();
+</script>
+
+{% endblock %}

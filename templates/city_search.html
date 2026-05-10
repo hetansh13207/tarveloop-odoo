@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header fade-up">
+    <div>
+        <h2>Explore Cities</h2>
+        <p style="margin-top:4px;">Discover your next destination</p>
+    </div>
+</div>
+
+<div class="search-bar fade-up">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <form method="GET">
+        <input type="text" name="query" class="form-control"
+               placeholder="Search cities or countries..."
+               value="{{ request.args.get('query', '') }}">
+    </form>
+</div>
+
+<div class="row fade-up">
+    {% for city in cities %}
+    <div class="col-4 mb-col">
+        <div class="city-card">
+            <div style="overflow:hidden;position:relative;">
+                <img src="{{ dest_img(city.name, city.country) }}" alt="{{ city.name }}" loading="lazy">
+                <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(8,10,18,0.7) 0%,transparent 60%);"></div>
+                <div style="position:absolute;bottom:10px;left:12px;">
+                    <span class="cost-badge {% if city.cost == 'High' %}cost-high{% elif city.cost == 'Medium' %}cost-medium{% else %}cost-low{% endif %}" style="backdrop-filter:blur(8px);">
+                        {{ city.cost }} Cost
+                    </span>
+                </div>
+            </div>
+            <div class="city-card-body">
+                <div class="city-name">{{ city.name }}</div>
+                <div class="city-country">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="width:11px;height:11px;vertical-align:middle;margin-right:3px;"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 0 1-2.827 0l-4.244-4.243a8 8 0 1 1 11.314 0z"/><path d="M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0z"/></svg>
+                    {{ city.country }}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="card">
+            <div class="empty-state">
+                <div class="empty-state-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </div>
+                <h3>No Cities Found</h3>
+                <p>Try a different search term.</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

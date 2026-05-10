@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="page-header fade-up">
+    <div>
+        <h2>Add Stop</h2>
+        <p style="margin-top:4px;">Add a city to your itinerary.</p>
+    </div>
+</div>
+
+<div style="max-width:480px;margin:0 auto;" class="fade-up">
+    <div class="card">
+        <div class="card-body">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="form-group">
+                    <label class="form-label">City</label>
+                    {{ form.city(class="form-control", placeholder="e.g. Paris") }}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Country</label>
+                    {{ form.country(class="form-control", placeholder="e.g. France") }}
+                </div>
+
+                <div class="row">
+                    <div class="col-6 mb-col">
+                        <div class="form-group mb-0">
+                            <label class="form-label">Arrival Date</label>
+                            {{ form.start_date(class="form-control") }}
+                        </div>
+                    </div>
+                    <div class="col-6 mb-col">
+                        <div class="form-group mb-0">
+                            <label class="form-label">Departure Date</label>
+                            {{ form.end_date(class="form-control") }}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary">Add Stop</button>
+                    <a href="javascript:history.back()" class="btn btn-ghost">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
